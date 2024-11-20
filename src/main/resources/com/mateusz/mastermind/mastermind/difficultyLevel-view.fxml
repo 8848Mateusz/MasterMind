@@ -6,7 +6,7 @@
       fx:controller="com.mateusz.mastermind.mastermind.DifficultyLevelController"
       prefWidth="520" prefHeight="440">
     <Label text="Select difficulty level:" style="-fx-font-size: 20px;"/>
-    <ComboBox fx:id="difficultyComboBox" prefWidth="200"/>
     <Button text="Show level details" onAction="#showDifficultyDetails"/>
-    <Button text="Start Easy Game" onAction="#startEasyGame"/>
+    <ComboBox fx:id="difficultyComboBox" promptText="Select Difficulty" prefWidth="200"/>
+    <Button fx:id="startGameButton" text="Start Game" onAction="#startGame" disable="true"/>
 </VBox>

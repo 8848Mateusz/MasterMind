@@ -4,8 +4,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -13,17 +15,31 @@ import java.io.IOException;
 public class DifficultyLevelController {
 
     @FXML
+    private Button startGameButton;
+
+    @FXML
     private ComboBox<String> difficultyComboBox;
 
     @FXML
     public void initialize() {
         difficultyComboBox.getItems().addAll("Easy", "Medium", "Hard");
-        difficultyComboBox.setValue("Easy");
+        difficultyComboBox.setOnAction(event -> {
+            startGameButton.setDisable(difficultyComboBox.getValue() == null);
+        });
     }
 
     @FXML
     public void showDifficultyDetails() {
         String selectedDifficulty = difficultyComboBox.getValue();
+
+        if (selectedDifficulty == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Level Selected");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a difficulty level to see the details.");
+            alert.showAndWait();
+            return;
+        }
         String details;
 
         switch (selectedDifficulty) {
@@ -39,7 +55,6 @@ public class DifficultyLevelController {
             default:
                 details = "Unknown difficulty level.";
         }
-
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Show level details");
         alert.setHeaderText("Level: " + selectedDifficulty);
@@ -48,18 +63,23 @@ public class DifficultyLevelController {
     }
 
     @FXML
-    public void startGame() {
+    public void startGame(ActionEvent event) {
         String selectedDifficulty = difficultyComboBox.getValue();
-        System.out.println("The game starts at the level: " + selectedDifficulty);
-    }
-
-    @FXML
-    public void startEasyGame(ActionEvent event) {
+        if (selectedDifficulty == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Level Selected");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a difficulty level before starting the game.");
+            alert.showAndWait();
+            return;
+        }
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("game-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
+            Parent root = fxmlLoader.load();
+            GameController gameController = fxmlLoader.getController();
+            gameController.startGame(selectedDifficulty);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
+            stage.setScene(new Scene(root));
         } catch (IOException e) {
             e.printStackTrace();
         }

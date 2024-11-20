@@ -9,12 +9,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class GameController {
+
+    private int attempts = 0;
+
+    @FXML
+    private String currentDifficulty;
 
     @FXML
     private Button guessButton;
@@ -28,66 +32,137 @@ public class GameController {
     @FXML
     private Label infoLabel;
 
+    private int maxAttempts;
+    private int codeLength;
+    private boolean allowDuplicates;
     private List<Integer> secretCode;
 
     @FXML
-    public void initialize() {
+    private HBox inputContainer;
+
+    public void startGame(String difficulty) {
+         currentDifficulty = difficulty;
+        switch (difficulty) {
+            case "Easy":
+                maxAttempts = 12;
+                codeLength = 4;
+                allowDuplicates = false;
+                infoLabel.setText("Level Easy: 12 attempts, no duplicates");
+                break;
+            case "Medium":
+                maxAttempts = 10;
+                codeLength = 5;
+                allowDuplicates = true;
+                infoLabel.setText("Level Medium: 10 attempts, duplicates allowed");
+                break;
+            case "Hard":
+                maxAttempts = 8;
+                codeLength = 6;
+                allowDuplicates = true;
+                infoLabel.setText("Level Hard: 8 attempts, duplicates allowed");
+                break;
+            default:
+                System.out.println("Unknown difficulty level!");
+                return;
+        }
         generateSecretCode();
+        updateUIForDifficulty();
     }
 
     private void generateSecretCode() {
         Random random = new Random();
         secretCode = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            secretCode.add(random.nextInt(10));
+        for (int i = 0; i < codeLength; i++) {
+            int digit = random.nextInt(10);
+            if (!allowDuplicates && secretCode.contains(digit)) {
+                i--;
+            } else {
+                secretCode.add(digit);
+            }
         }
         System.out.println("Secret Code: " + secretCode);
     }
 
-    @FXML
-    public void handleGuess() {
-        try {
-            int guess1 = Integer.parseInt(inputField1.getText());
-            int guess2 = Integer.parseInt(inputField2.getText());
-            int guess3 = Integer.parseInt(inputField3.getText());
-            int guess4 = Integer.parseInt(inputField4.getText());
+    private void updateUIForDifficulty() {
+        inputContainer.getChildren().clear();
+        for (int i = 0; i < codeLength; i++) {
+            TextField inputField = new TextField();
+            inputField.setPromptText("Number" + (i + 1));
+            inputField.setPrefWidth(50);
+            inputContainer.getChildren().add(inputField);
+        }
+    }
 
-            List<Integer> guess = List.of(guess1, guess2, guess3, guess4);
+    private boolean validateUserInput(List<Integer> userInput, String difficulty) {
+        int requiredLength;
+        switch (difficulty) {
+            case "Easy":
+                requiredLength = 4;
+                break;
+            case "Medium":
+                requiredLength = 5;
+                break;
+            case "Hard":
+                requiredLength = 6;
+                break;
+            default:
+                System.out.println("Unknown difficulty level!");
+                return false;
+        }
 
-            if (guess.stream().anyMatch(num -> num < 0 || num > 9)) {
-                infoLabel.setText("Numbers must be between 0 and 9!");
-                return;
+        if (userInput.size() != requiredLength) {
+            System.out.println("Invalid input length. Expected " + requiredLength + " numbers.");
+            return false;
+        }
+
+        for (Integer number : userInput) {
+            if (number < 0 || number > 9) {
+                System.out.println("Numbers must be between 0 and 9.");
+                return false;
             }
+        }
 
-            int correctPositions = 0;
-            int correctNumbers = 0;
+        if (difficulty.equals("Easy")) {
+            Set<Integer> uniqueNumbers = new HashSet<>(userInput);
+            if (uniqueNumbers.size() != userInput.size()) {
+                System.out.println("No duplicate numbers allowed on Easy level!");
+                return false;
+            }
+        }
+        return true;
+    }
 
-            for (int i = 0; i < 4; i++) {
-                if (guess.get(i).equals(secretCode.get(i))) {
-                    correctPositions++;
-                } else if (secretCode.contains(guess.get(i))) {
-                    correctNumbers++;
+    @FXML
+    private void checkGuess(ActionEvent event) {
+        List<Integer> userInput = new ArrayList<>();
+        for (Node node : inputContainer.getChildren()) {
+            if (node instanceof TextField) {
+                String text = ((TextField) node).getText();
+                try {
+                    userInput.add(Integer.parseInt(text));
+                } catch (NumberFormatException e) {
+                    infoLabel.setText("Please enter valid numbers!");
+                    return;
                 }
             }
-
-            historyList.getItems().add(
-                    "Guess: " + guess + " | Correct Positions: " + correctPositions + ", Correct Numbers: " + correctNumbers
-            );
-
-            if (correctPositions == 4) {
-                infoLabel.setText("Congratulations! You've guessed the code!");
-                guessButton.setVisible(false);
-            } else {
-                infoLabel.setText("Keep trying!");
-            }
-
-            inputField1.clear();
-            inputField2.clear();
-            inputField3.clear();
-            inputField4.clear();
-
-        } catch (NumberFormatException e) {
+        }
+        if (!validateUserInput(userInput, currentDifficulty)) {
             infoLabel.setText("Please enter valid numbers!");
+            return;
+        }
+        attempts++;
+
+        if (userInput.equals(secretCode)) {
+            infoLabel.setText("Congratulations! You guessed the secret code.");
+            guessButton.setVisible(false);
+        } else {
+            infoLabel.setText("Incorrect guess. Attempts left: " + (maxAttempts - attempts));
+        }
+        historyList.getItems().add("Guess: " + userInput + " - " + (userInput.equals(secretCode) ? "Correct!" : "Wrong!"));
+
+        if (attempts >= maxAttempts) {
+            infoLabel.setText("No more attempts left! The secret code was: " + secretCode);
+            guessButton.setVisible(false);
         }
     }
 
