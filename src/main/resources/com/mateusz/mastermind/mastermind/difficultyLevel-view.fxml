@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="40"
+      fx:controller="com.mateusz.mastermind.mastermind.DifficultyLevelController"
+      prefWidth="520" prefHeight="440">
+    <Label text="Select difficulty level:" style="-fx-font-size: 20px;"/>
+    <ComboBox fx:id="difficultyComboBox" prefWidth="200"/>
+    <Button text="Show level details" onAction="#showDifficultyDetails"/>
+    <Button text="Start game" onAction="#startGame"/>
+</VBox>
