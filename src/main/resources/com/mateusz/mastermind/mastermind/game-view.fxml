@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/javafx"
+      fx:controller="com.mateusz.mastermind.mastermind.GameController"
+      alignment="CENTER" spacing="20">
+    <Label text="Easy Level: Guess the 4-digit code" style="-fx-font-size: 20px;"/>
+    <Label fx:id="infoLabel" text="Enter numbers between 0 and 9" style="-fx-font-size: 16px;"/>
+
+    <HBox spacing="10" alignment="CENTER">
+        <TextField fx:id="inputField1" promptText="1" prefWidth="50"/>
+        <TextField fx:id="inputField2" promptText="2" prefWidth="50"/>
+        <TextField fx:id="inputField3" promptText="3" prefWidth="50"/>
+        <TextField fx:id="inputField4" promptText="4" prefWidth="50"/>
+    </HBox>
+
+    <Button fx:id="guessButton" text="Guess" onAction="#handleGuess"/>
+
+    <ListView fx:id="historyList" prefHeight="520" prefWidth="440"/>
+
+    <Button text="Back to Menu" onAction="#goBackToMenu"/>
+
+</VBox>

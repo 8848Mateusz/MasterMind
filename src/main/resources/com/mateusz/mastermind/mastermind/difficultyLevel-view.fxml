@@ -8,5 +8,5 @@
     <Label text="Select difficulty level:" style="-fx-font-size: 20px;"/>
     <ComboBox fx:id="difficultyComboBox" prefWidth="200"/>
     <Button text="Show level details" onAction="#showDifficultyDetails"/>
-    <Button text="Start game" onAction="#startGame"/>
+    <Button text="Start Easy Game" onAction="#startEasyGame"/>
 </VBox>

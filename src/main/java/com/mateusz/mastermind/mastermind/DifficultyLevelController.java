@@ -1,8 +1,14 @@
 package com.mateusz.mastermind.mastermind;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.stage.Stage;
+import java.io.IOException;
 
 public class DifficultyLevelController {
 
@@ -45,5 +51,17 @@ public class DifficultyLevelController {
     public void startGame() {
         String selectedDifficulty = difficultyComboBox.getValue();
         System.out.println("The game starts at the level: " + selectedDifficulty);
+    }
+
+    @FXML
+    public void startEasyGame(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("game-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
