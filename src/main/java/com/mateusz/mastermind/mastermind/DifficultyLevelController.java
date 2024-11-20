@@ -14,9 +14,14 @@ import java.io.IOException;
 
 public class DifficultyLevelController {
 
+    private String playerName;
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
     @FXML
     private Button startGameButton;
-
     @FXML
     private ComboBox<String> difficultyComboBox;
 
@@ -78,6 +83,7 @@ public class DifficultyLevelController {
             Parent root = fxmlLoader.load();
             GameController gameController = fxmlLoader.getController();
             gameController.startGame(selectedDifficulty);
+            gameController.setPlayerName(playerName);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (IOException e) {

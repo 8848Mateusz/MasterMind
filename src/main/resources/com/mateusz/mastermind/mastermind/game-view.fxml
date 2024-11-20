@@ -19,7 +19,7 @@
     <Button fx:id="guessButton" text="Guess" onAction="#checkGuess"/>
     <Button fx:id="pauseButton" text="Pause" onAction="#togglePause"/>
 
-    <ListView fx:id="historyList" prefHeight="520" prefWidth="440"/>
+    <ListView fx:id="historyList" prefHeight="520" prefWidth="520"/>
 
     <Button text="Back to Menu" onAction="#goBackToMenu"/>
 

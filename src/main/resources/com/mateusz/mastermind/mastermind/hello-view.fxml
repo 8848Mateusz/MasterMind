@@ -13,7 +13,8 @@
     </padding>
     <Label text="Mastermind" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
     <Label text="Challenge Your Mind!" style="-fx-font-size: 24px;"/>
-    <TextField fx:id="playerNameField" promptText="Enter your name" prefWidth="200"/>
-    <Button text="Begin Challenge" onAction="#goToDifficultyLevel"/>
+    <TextField fx:id="nameInput" promptText="Enter your name" prefWidth="200"/>
+    <Button text="Begin Challenge" onAction="#startGame"/>
+    <Button text="View Leaderboard" onAction="#goToLeaderboard"/>
 
 </VBox>

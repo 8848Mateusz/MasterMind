@@ -26,6 +26,11 @@ public class GameController {
     private int codeLength;
     private boolean allowDuplicates;
     private List<Integer> secretCode;
+    private String playerName;
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
 
     @FXML
     private String currentDifficulty;
@@ -219,20 +224,11 @@ public class GameController {
         attempts++;
 
         if (userInput.equals(secretCode)) {
-            infoLabel.setText("Congratulations! You guessed the secret code.");
-            guessButton.setVisible(false);
-            stopTimer();
-            hidePauseButton();
+            endGame(true);
+        } else if (attempts >= maxAttempts) {
+            endGame(false);
         } else {
             infoLabel.setText("Incorrect guess. Attempts left: " + (maxAttempts - attempts));
-        }
-        historyList.getItems().add("Guess: " + userInput + " - " + (userInput.equals(secretCode) ? "Correct!" : "Wrong!"));
-
-        if (attempts >= maxAttempts) {
-            infoLabel.setText("No more attempts left! The secret code was: " + secretCode);
-            guessButton.setVisible(false);
-            stopTimer();
-            hidePauseButton();
         }
     }
 
@@ -248,5 +244,18 @@ public class GameController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void endGame(boolean isWin) {
+        stopTimer();
+        String time = String.format("%02d:%02d", secondsElapsed / 60, secondsElapsed % 60);
+        Leaderboard.saveScore(playerName, attempts, time, currentDifficulty);
+        if (isWin) {
+            infoLabel.setText("Congratulations, " + playerName + "! You guessed the secret code.");
+        } else {
+            infoLabel.setText("Game over! The code was: " + secretCode);
+        }
+        guessButton.setVisible(false);
+        hidePauseButton();
     }
 }

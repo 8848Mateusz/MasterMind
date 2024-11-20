@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -12,17 +13,39 @@ import java.io.IOException;
 public class HelloController {
 
     @FXML
-    private TextField playerNameField;
+    private TextField nameInput;
 
     @FXML
-    public void startGame() {
-        String playerName = playerNameField.getText();
-        System.out.println("Starting game for player: " + playerName);
-    }
+    private void startGame(ActionEvent event) {
+        String playerName = nameInput.getText();
 
-    public void goToDifficultyLevel(ActionEvent event) {
+        if (playerName == null || playerName.trim().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Name");
+            alert.setHeaderText(null);
+            alert.setContentText("Please enter your name before starting the game.");
+            alert.showAndWait();
+            return;
+        }
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("difficultyLevel-view.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+
+            DifficultyLevelController controller = fxmlLoader.getController();
+            controller.setPlayerName(playerName);
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void goToLeaderboard(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("leaderboard-view.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);

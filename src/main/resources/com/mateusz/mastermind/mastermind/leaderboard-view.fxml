@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.Button?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mateusz.mastermind.mastermind.LeaderboardController"
+      alignment="CENTER" spacing="10">
+
+    <TableView fx:id="leaderboardTable" prefWidth="400">
+        <columns>
+            <TableColumn text="Player" fx:id="playerColumn" prefWidth="100"/>
+            <TableColumn text="Attempts" fx:id="attemptsColumn" prefWidth="100"/>
+            <TableColumn text="Time" fx:id="timeColumn" prefWidth="100"/>
+            <TableColumn text="Difficulty" fx:id="difficultyColumn" prefWidth="100"/>
+        </columns>
+    </TableView>
+    <Button text="Back to Menu" onAction="#goBackToMenu"/>
+</VBox>
