@@ -223,6 +223,31 @@ public class GameController {
         }
         attempts++;
 
+        int correctPositions = 0;
+        int correctNumbers = 0;
+
+        List<Integer> tempSecretCode = new ArrayList<>(secretCode);
+        List<Integer> tempUserInput = new ArrayList<>(userInput);
+
+        for (int i = 0; i < tempUserInput.size(); i++) {
+            if (tempUserInput.get(i).equals(tempSecretCode.get(i))) {
+                correctPositions++;
+                tempSecretCode.set(i, null);
+                tempUserInput.set(i, null);
+            }
+        }
+        for (Integer number : tempUserInput) {
+            if (number != null && tempSecretCode.contains(number)) {
+                correctNumbers++;
+                tempSecretCode.set(tempSecretCode.indexOf(number), null);
+            }
+        }
+
+        String guessResult = "Guess: " + userInput +
+                " | Correct Positions: " + correctPositions +
+                ", Correct Numbers: " + correctNumbers;
+        historyList.getItems().add(guessResult);
+
         if (userInput.equals(secretCode)) {
             endGame(true);
         } else if (attempts >= maxAttempts) {
