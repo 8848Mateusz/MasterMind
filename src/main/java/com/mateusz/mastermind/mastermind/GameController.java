@@ -1,5 +1,7 @@
 package com.mateusz.mastermind.mastermind;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,11 +13,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import java.util.*;
 
 public class GameController {
 
+    private Timeline timer;
+    private int secondsElapsed = 0;
+    private boolean isPaused = false;
     private int attempts = 0;
+    private int maxAttempts;
+    private int codeLength;
+    private boolean allowDuplicates;
+    private List<Integer> secretCode;
 
     @FXML
     private String currentDifficulty;
@@ -32,13 +42,68 @@ public class GameController {
     @FXML
     private Label infoLabel;
 
-    private int maxAttempts;
-    private int codeLength;
-    private boolean allowDuplicates;
-    private List<Integer> secretCode;
-
     @FXML
     private HBox inputContainer;
+
+    @FXML
+    private Label timerLabel;
+
+    @FXML
+    private Button pauseButton;
+
+    @FXML
+    private void togglePause() {
+        if (isPaused) {
+            resumeGame();
+        } else {
+            pauseGame();
+        }
+    }
+
+    private void hidePauseButton() {
+        pauseButton.setVisible(false);
+        pauseButton.setManaged(false);
+    }
+
+    private void pauseGame() {
+        isPaused = true;
+        pauseButton.setText("Resume");
+        disableGameControls(true);
+    }
+
+    private void resumeGame() {
+        isPaused = false;
+        pauseButton.setText("Pause");
+        disableGameControls(false);
+    }
+
+    private void disableGameControls(boolean disable) {
+        inputContainer.setDisable(disable);
+        guessButton.setDisable(disable);
+    }
+
+    private void updateTimerLabel(){
+        int minutes = secondsElapsed / 60;
+        int seconds = secondsElapsed % 60;
+        timerLabel.setText(String.format("%d:%02d", minutes, seconds));
+    }
+
+    private void stopTimer() {
+        if (timer != null) {
+            timer.stop();
+        }
+    }
+
+    private void startTimer() {
+        timer = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            if (!isPaused) {
+                secondsElapsed++;
+                updateTimerLabel();
+            }
+        }));
+        timer.setCycleCount(Timeline.INDEFINITE);
+        timer.play();
+    }
 
     public void startGame(String difficulty) {
          currentDifficulty = difficulty;
@@ -66,6 +131,7 @@ public class GameController {
                 return;
         }
         generateSecretCode();
+        startTimer();
         updateUIForDifficulty();
     }
 
@@ -155,6 +221,8 @@ public class GameController {
         if (userInput.equals(secretCode)) {
             infoLabel.setText("Congratulations! You guessed the secret code.");
             guessButton.setVisible(false);
+            stopTimer();
+            hidePauseButton();
         } else {
             infoLabel.setText("Incorrect guess. Attempts left: " + (maxAttempts - attempts));
         }
@@ -163,6 +231,8 @@ public class GameController {
         if (attempts >= maxAttempts) {
             infoLabel.setText("No more attempts left! The secret code was: " + secretCode);
             guessButton.setVisible(false);
+            stopTimer();
+            hidePauseButton();
         }
     }
 

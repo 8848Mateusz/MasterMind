@@ -7,6 +7,7 @@
       fx:controller="com.mateusz.mastermind.mastermind.GameController"
       alignment="CENTER" spacing="20">
     <Label fx:id="infoLabel" text="Welcome to Mastermind!" style="-fx-font-size: 20px;" alignment="CENTER"/>
+    <Label fx:id="timerLabel" text="00:00" style="-fx-font-size: 15px;"/>
 
     <HBox fx:id="inputContainer" spacing="10" alignment="CENTER">
         <TextField fx:id="inputField1" promptText="1" prefWidth="50"/>
@@ -16,6 +17,7 @@
     </HBox>
 
     <Button fx:id="guessButton" text="Guess" onAction="#checkGuess"/>
+    <Button fx:id="pauseButton" text="Pause" onAction="#togglePause"/>
 
     <ListView fx:id="historyList" prefHeight="520" prefWidth="440"/>
 
