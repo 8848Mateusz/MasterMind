@@ -2,9 +2,20 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="40"
       fx:controller="com.mateusz.mastermind.mastermind.DifficultyLevelController"
       prefWidth="520" prefHeight="440">
+    <Label text="Choose Game Mode" style="-fx-font-size: 20px;"/>
+    <ComboBox fx:id="gameModeComboBox" promptText="Select Mode" prefWidth="200">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="Numbers"/>
+                <String fx:value="Colors"/>
+            </FXCollections>
+        </items>
+    </ComboBox>
     <Label text="Select difficulty level:" style="-fx-font-size: 20px;"/>
     <Button text="Show level details" onAction="#showDifficultyDetails"/>
     <ComboBox fx:id="difficultyComboBox" promptText="Select Difficulty" prefWidth="200"/>

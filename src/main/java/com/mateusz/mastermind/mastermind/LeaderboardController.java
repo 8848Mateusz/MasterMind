@@ -12,6 +12,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class LeaderboardController {
@@ -26,6 +27,8 @@ public class LeaderboardController {
     private TableColumn<Score, String> timeColumn;
     @FXML
     private TableColumn<Score, String> difficultyColumn;
+    @FXML
+    private  TableColumn<Score, String> gameModeColumn;
 
     @FXML
     public void initialize() {
@@ -33,6 +36,7 @@ public class LeaderboardController {
         attemptsColumn.setCellValueFactory(new PropertyValueFactory<>("attempts"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
         difficultyColumn.setCellValueFactory(new PropertyValueFactory<>("difficulty"));
+        gameModeColumn.setCellValueFactory(new PropertyValueFactory<>("gameMode"));
 
         ObservableList<Score> scores = loadScores();
         if (scores.isEmpty()) {
@@ -64,7 +68,11 @@ public class LeaderboardController {
 
         for (String[] row : rawScores) {
             try {
-                scores.add(new Score(row[0], Integer.parseInt(row[1]), row[2], row[3]));
+                if (row.length == 5) {
+                    scores.add(new Score(row[0], Integer.parseInt(row[1]), row[2], row[3], row[4]));
+                } else {
+                    System.err.println("Skipped invalid row: " + Arrays.toString(row));
+                }
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
             }

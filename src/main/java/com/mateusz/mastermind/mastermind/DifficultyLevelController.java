@@ -24,13 +24,21 @@ public class DifficultyLevelController {
     private Button startGameButton;
     @FXML
     private ComboBox<String> difficultyComboBox;
+    @FXML
+    private ComboBox<String> gameModeComboBox;
 
     @FXML
     public void initialize() {
         difficultyComboBox.getItems().addAll("Easy", "Medium", "Hard");
-        difficultyComboBox.setOnAction(event -> {
-            startGameButton.setDisable(difficultyComboBox.getValue() == null);
-        });
+        gameModeComboBox.getItems().clear();
+        gameModeComboBox.getItems().addAll("Numbers","Colors");
+        difficultyComboBox.setOnAction(event -> validateSelection());
+        gameModeComboBox.setOnAction(event -> validateSelection());
+    }
+
+    private void validateSelection() {
+        boolean isValid = difficultyComboBox.getValue() != null && gameModeComboBox.getValue() != null;
+        startGameButton.setDisable(!isValid);
     }
 
     @FXML
@@ -49,13 +57,13 @@ public class DifficultyLevelController {
 
         switch (selectedDifficulty) {
             case "Easy":
-                details = "12 attempts, 4 colors, no repetitions.";
+                details = "12 attempts, 4 colors or numbers, no repetitions.";
                 break;
             case "Medium":
-                details = "10 attempts, 5 colors, repetitions possible.";
+                details = "10 attempts, 5 colors or numbers, repetitions possible.";
                 break;
             case "Hard":
-                details = "8 attempts, 6 colors, repetitions possible.";
+                details = "8 attempts, 6 colors or numbers, repetitions possible.";
                 break;
             default:
                 details = "Unknown difficulty level.";
@@ -70,11 +78,12 @@ public class DifficultyLevelController {
     @FXML
     public void startGame(ActionEvent event) {
         String selectedDifficulty = difficultyComboBox.getValue();
-        if (selectedDifficulty == null) {
+        String selectedGameMode = gameModeComboBox.getValue();
+        if (selectedDifficulty == null || selectedGameMode == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Level Selected");
+            alert.setTitle("Incomplete Selection");
             alert.setHeaderText(null);
-            alert.setContentText("Please select a difficulty level before starting the game.");
+            alert.setContentText("Please select both a difficulty level and a game mode.");
             alert.showAndWait();
             return;
         }
@@ -82,7 +91,8 @@ public class DifficultyLevelController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("game-view.fxml"));
             Parent root = fxmlLoader.load();
             GameController gameController = fxmlLoader.getController();
-            gameController.startGame(selectedDifficulty);
+            gameController.setGameMode(selectedGameMode);
+            gameController.startGame(selectedDifficulty, selectedGameMode);
             gameController.setPlayerName(playerName);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));

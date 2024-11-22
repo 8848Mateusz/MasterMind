@@ -7,14 +7,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameController {
 
@@ -22,14 +22,30 @@ public class GameController {
     private int secondsElapsed = 0;
     private boolean isPaused = false;
     private int attempts = 0;
+    private int correctNumbers = 0;
+    private int correctPositions = 0;
     private int maxAttempts;
     private int codeLength;
     private boolean allowDuplicates;
-    private List<Integer> secretCode;
+    private List<String> secretCode;
     private String playerName;
+    private String gameMode;
+
+    private final Map<String, String> colorToIconMap = Map.of(
+            "Red", "\uD83D\uDD34",
+            "Blue", "\uD83D\uDD35",
+            "Green", "\uD83D\uDFE2",
+            "Yellow", "\uD83D\uDFE1",
+            "Orange", "\uD83D\uDFE0",
+            "Purple", "\uD83D\uDFE3"
+    );
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public void setGameMode(String gameMode) {
+        this.gameMode = gameMode;
     }
 
     @FXML
@@ -37,9 +53,6 @@ public class GameController {
 
     @FXML
     private Button guessButton;
-
-    @FXML
-    private TextField inputField1, inputField2, inputField3, inputField4;
 
     @FXML
     private ListView<String> historyList;
@@ -87,7 +100,7 @@ public class GameController {
         guessButton.setDisable(disable);
     }
 
-    private void updateTimerLabel(){
+    private void updateTimerLabel() {
         int minutes = secondsElapsed / 60;
         int seconds = secondsElapsed % 60;
         timerLabel.setText(String.format("%d:%02d", minutes, seconds));
@@ -110,31 +123,36 @@ public class GameController {
         timer.play();
     }
 
-    public void startGame(String difficulty) {
-         currentDifficulty = difficulty;
+    public void startGame(String difficulty, String gameMode) {
+        if (gameMode == null) {
+            infoLabel.setText("Error: Game mode is not set!");
+            return;
+        }
+
+        currentDifficulty = difficulty;
         switch (difficulty) {
             case "Easy":
                 maxAttempts = 12;
                 codeLength = 4;
                 allowDuplicates = false;
-                infoLabel.setText("Level Easy: 12 attempts, no duplicates");
                 break;
             case "Medium":
                 maxAttempts = 10;
                 codeLength = 5;
                 allowDuplicates = true;
-                infoLabel.setText("Level Medium: 10 attempts, duplicates allowed");
                 break;
             case "Hard":
                 maxAttempts = 8;
                 codeLength = 6;
                 allowDuplicates = true;
-                infoLabel.setText("Level Hard: 8 attempts, duplicates allowed");
                 break;
             default:
                 System.out.println("Unknown difficulty level!");
                 return;
         }
+        infoLabel.setText(gameMode.equals("Numbers")
+                ? "Guess the " + codeLength + "-digit code (numbers)"
+                : "Guess the " + codeLength + "-color sequence");
         generateSecretCode();
         startTimer();
         updateUIForDifficulty();
@@ -143,12 +161,24 @@ public class GameController {
     private void generateSecretCode() {
         Random random = new Random();
         secretCode = new ArrayList<>();
-        for (int i = 0; i < codeLength; i++) {
-            int digit = random.nextInt(10);
-            if (!allowDuplicates && secretCode.contains(digit)) {
-                i--;
-            } else {
-                secretCode.add(digit);
+        if (gameMode.equals("Numbers")) {
+            for (int i = 0; i < codeLength; i++) {
+                String digit = String.valueOf(random.nextInt(10));
+                if (!allowDuplicates && secretCode.contains(digit)) {
+                    i--;
+                } else {
+                    secretCode.add(digit);
+                }
+            }
+        } else if (gameMode.equals("Colors")) {
+            String[] colors = {"Red", "Blue", "Green", "Yellow", "Orange", "Purple"};
+            for (int i = 0; i < codeLength; i++) {
+                String color = colors[random.nextInt(colors.length)];
+                if (!allowDuplicates && secretCode.contains(color)) {
+                    i--;
+                } else {
+                    secretCode.add(color);
+                }
             }
         }
         System.out.println("Secret Code: " + secretCode);
@@ -156,48 +186,71 @@ public class GameController {
 
     private void updateUIForDifficulty() {
         inputContainer.getChildren().clear();
-        for (int i = 0; i < codeLength; i++) {
-            TextField inputField = new TextField();
-            inputField.setPromptText("Number" + (i + 1));
-            inputField.setPrefWidth(50);
-            inputContainer.getChildren().add(inputField);
+        if (gameMode.equals("Colors")) {
+            for (int i = 0; i < codeLength; i++) {
+                ComboBox<String> colorBox = new ComboBox<>();
+                colorBox.getItems().addAll("Red", "Blue", "Green", "Yellow", "Orange", "Purple");
+                colorBox.setPromptText("Color " + (i + 1));
+                colorBox.setCellFactory(lv -> new ListCell<>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null || empty) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            setGraphic(createColorIcon(item));
+                            setText(null);
+                        }
+                    }
+                });
+
+                colorBox.setButtonCell(new ListCell<>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null || empty) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            setGraphic(createColorIcon(item));
+                            setText(null);
+                        }
+                    }
+                });
+                inputContainer.getChildren().add(colorBox);
+            }
+        } else {
+            for (int i = 0; i < codeLength; i++) {
+                TextField inputField = new TextField();
+                inputField.setPromptText("Number " + (i + 1));
+                inputField.setPrefWidth(50);
+                inputContainer.getChildren().add(inputField);
+            }
         }
     }
 
-    private boolean validateUserInput(List<Integer> userInput, String difficulty) {
-        int requiredLength;
-        switch (difficulty) {
-            case "Easy":
-                requiredLength = 4;
-                break;
-            case "Medium":
-                requiredLength = 5;
-                break;
-            case "Hard":
-                requiredLength = 6;
-                break;
-            default:
-                System.out.println("Unknown difficulty level!");
-                return false;
-        }
-
-        if (userInput.size() != requiredLength) {
-            System.out.println("Invalid input length. Expected " + requiredLength + " numbers.");
+    private boolean validateUserInput(List<String> userInput) {
+        if (userInput.size() != codeLength) {
             return false;
         }
-
-        for (Integer number : userInput) {
-            if (number < 0 || number > 9) {
-                System.out.println("Numbers must be between 0 and 9.");
+        if (gameMode.equals("Numbers")) {
+            try {
+                for (String input : userInput) {
+                    int number = Integer.parseInt(input);
+                    if (number < 0 || number > 9) {
+                        return false;
+                    }
+                }
+            } catch (NumberFormatException e) {
                 return false;
             }
-        }
-
-        if (difficulty.equals("Easy")) {
-            Set<Integer> uniqueNumbers = new HashSet<>(userInput);
-            if (uniqueNumbers.size() != userInput.size()) {
-                System.out.println("No duplicate numbers allowed on Easy level!");
-                return false;
+        } else if (gameMode.equals("Colors")) {
+            Set<String> validColors = Set.of("Red", "Blue", "Green", "Yellow", "Orange", "Purple");
+            for (String input : userInput) {
+                if (!validColors.contains(input)) {
+                    return false;
+                }
             }
         }
         return true;
@@ -205,29 +258,31 @@ public class GameController {
 
     @FXML
     private void checkGuess(ActionEvent event) {
-        List<Integer> userInput = new ArrayList<>();
+        List<String> userInput = new ArrayList<>();
         for (Node node : inputContainer.getChildren()) {
             if (node instanceof TextField) {
-                String text = ((TextField) node).getText();
-                try {
-                    userInput.add(Integer.parseInt(text));
-                } catch (NumberFormatException e) {
-                    infoLabel.setText("Please enter valid numbers!");
+                userInput.add(((TextField) node).getText());
+            } else if (node instanceof ComboBox) {
+                ComboBox<String> comboBox = (ComboBox<String>) node;
+                String value = comboBox.getValue();
+                if (value == null) {
+                    infoLabel.setText("Please select all colors!");
                     return;
                 }
+                userInput.add(value);
             }
         }
-        if (!validateUserInput(userInput, currentDifficulty)) {
-            infoLabel.setText("Please enter valid numbers!");
+
+        if (!validateUserInput(userInput)) {
+            infoLabel.setText("Invalid input. Please try again.");
             return;
         }
-        attempts++;
 
-        int correctPositions = 0;
-        int correctNumbers = 0;
+        List<String> tempSecretCode = new ArrayList<>(secretCode);
+        List<String> tempUserInput = new ArrayList<>(userInput);
 
-        List<Integer> tempSecretCode = new ArrayList<>(secretCode);
-        List<Integer> tempUserInput = new ArrayList<>(userInput);
+        correctPositions = 0;
+        correctNumbers = 0;
 
         for (int i = 0; i < tempUserInput.size(); i++) {
             if (tempUserInput.get(i).equals(tempSecretCode.get(i))) {
@@ -236,18 +291,24 @@ public class GameController {
                 tempUserInput.set(i, null);
             }
         }
-        for (Integer number : tempUserInput) {
-            if (number != null && tempSecretCode.contains(number)) {
+
+        for (String value : tempUserInput) {
+            if (value != null && tempSecretCode.contains(value)) {
                 correctNumbers++;
-                tempSecretCode.set(tempSecretCode.indexOf(number), null);
+                tempSecretCode.set(tempSecretCode.indexOf(value), null);
             }
         }
 
-        String guessResult = "Guess: " + userInput +
+        List<String> guessIcons = userInput.stream()
+                .map(value -> colorToIconMap.getOrDefault(value, value))
+                .collect(Collectors.toList());
+
+        String guessResult = "Guess: " + String.join(" ", guessIcons) +
                 " | Correct Positions: " + correctPositions +
-                ", Correct Numbers: " + correctNumbers;
+                ", Correct Matches: " + correctNumbers;
         historyList.getItems().add(guessResult);
 
+        attempts++;
         if (userInput.equals(secretCode)) {
             endGame(true);
         } else if (attempts >= maxAttempts) {
@@ -274,13 +335,32 @@ public class GameController {
     private void endGame(boolean isWin) {
         stopTimer();
         String time = String.format("%02d:%02d", secondsElapsed / 60, secondsElapsed % 60);
-        Leaderboard.saveScore(playerName, attempts, time, currentDifficulty);
+        Leaderboard.saveScore(playerName, attempts, time, currentDifficulty, gameMode);
+
+        List<String> codeIcons = secretCode.stream()
+                .map(value -> colorToIconMap.getOrDefault(value, value))
+                .collect(Collectors.toList());
+
         if (isWin) {
             infoLabel.setText("Congratulations, " + playerName + "! You guessed the secret code.");
         } else {
-            infoLabel.setText("Game over! The code was: " + secretCode);
+            infoLabel.setText("Game over! The code was: " + String.join(" ", codeIcons));
         }
         guessButton.setVisible(false);
         hidePauseButton();
+    }
+
+    private Node createColorIcon(String color) {
+        Circle circle = new Circle(15); // Promień 15
+        switch (color) {
+            case "Red" -> circle.setFill(Color.RED);
+            case "Blue" -> circle.setFill(Color.BLUE);
+            case "Green" -> circle.setFill(Color.GREEN);
+            case "Yellow" -> circle.setFill(Color.YELLOW);
+            case "Orange" -> circle.setFill(Color.ORANGE);
+            case "Purple" -> circle.setFill(Color.PURPLE);
+            default -> circle.setFill(Color.GRAY);
+        }
+        return circle;
     }
 }

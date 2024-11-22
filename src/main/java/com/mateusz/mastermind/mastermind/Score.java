@@ -6,12 +6,14 @@ public class Score {
     private int attempts;
     private String time;
     private String difficulty;
+    private String gameMode;
 
-    public Score(String playerName, int attempts, String time, String difficulty) {
+    public Score(String playerName, int attempts, String time, String difficulty, String gameMode) {
         this.playerName = playerName;
         this.attempts = attempts;
         this.time = time;
         this.difficulty = difficulty;
+        this.gameMode = gameMode;
     }
 
     public int getAttempts() {
@@ -44,5 +46,13 @@ public class Score {
 
     public void setTime(String time) {
         this.time = time;
+    }
+
+    public String getGameMode() {
+        return gameMode;
+    }
+
+    public void setGameMode(String gameMode) {
+        this.gameMode = gameMode;
     }
 }
